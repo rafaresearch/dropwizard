@@ -1,9 +1,27 @@
+
+sudo: required
 language: java
 
-install: echo "I trust Maven."
-
-# don't just run the tests, also run Findbugs and friends
-script: mvn verify
-
 jdk:
-  - oraclejdk7
+  - openjdk8
+
+script:
+  - mvn package -DskipTests
+
+before_deploy:
+    - mkdir MiningBuild
+    - find . -name '*.jar' -exec cp {} ./MiningBuild \;
+    - cd /home/travis/build/rafaresearch/dropwizard/MiningBuild
+    - tar -zcvf result.tar.gz *
+deploy:
+  provider: releases
+  api_key:
+    secure: $GITHUB_TOKEN
+  file: result.tar.gz
+  name: fetchjar-ddd15a681bf42360337844412cae4aba1556eb88
+  file_glob: true
+  overwrite: true
+  skip_cleanup: true
+  on:
+    all_branches: true 
+            
